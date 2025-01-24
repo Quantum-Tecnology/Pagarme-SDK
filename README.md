@@ -14,7 +14,7 @@ Para utilizar a classe, basta instalar ela utilizando o comando do composer:
 composer require gustavosantarosa/pagarme-sdk
 ```
 
-Em seguida basta publicar o config dela em config/services.php
+Em seguida basta publicar o config dela em config/pagarme.php
 
 ```
 php artisan vendor:publish --tag=config
