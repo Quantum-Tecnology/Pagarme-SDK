@@ -1,0 +1,34 @@
+{
+  "name": "gustavosantarosa/pagarme-sdk",
+  "license": "MIT",
+  "homepage": "http://www.gustavosantarosa.esy.es/",
+  "description": "Pagarme SDK",
+  "require": {
+    "php": "^8.0",
+    "laravel/framework": "^10.0 | ^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "GustavoSantarosa\\PagarmeSDK\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Luis Gustavo Santarosa",
+      "email": "gustavo-computacao@hotmail.com",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "gustavo-computacao@hotmail.com"
+  },
+  "minimum-stability": "stable",
+  "extra": {
+    "laravel": {}
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  }
+}
