@@ -24,7 +24,11 @@
   },
   "minimum-stability": "stable",
   "extra": {
-    "laravel": {}
+    "laravel": {
+      "providers": [
+        "GustavoSantarosa\\PagarmeSDK\\Providers\\PagarmeServiceProvider"
+      ]
+    }
   },
   "config": {
     "allow-plugins": {
