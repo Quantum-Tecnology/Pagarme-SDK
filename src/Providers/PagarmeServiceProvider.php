@@ -17,6 +17,10 @@ class PagarmeServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/pagarme.php' => config_path('pagarme.php'),
         ], 'config');
+
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/pagarme.php', 'services'
+        );
     }
 
     /**
