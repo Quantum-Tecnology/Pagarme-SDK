@@ -4,9 +4,9 @@
  * Sdk similar https://packagist.org/packages/mundipagg/mundiapi.
  */
 
-namespace QuantumCode\PagarmeSDK;
+namespace QuantumTecnology\PagarmeSDK;
 
-use QuantumCode\PagarmeSDK\Recurrence\SubscriptionRepository;
+use QuantumTecnology\PagarmeSDK\Recurrence\SubscriptionRepository;
 
 class PaymentRepository
 {

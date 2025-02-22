@@ -4,7 +4,7 @@
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
 
-namespace QuantumCode\PagarmeSDK;
+namespace QuantumTecnology\PagarmeSDK;
 
 use App\Enums\PaymentEnum;
 use App\Exceptions\PaymentOperatorException;

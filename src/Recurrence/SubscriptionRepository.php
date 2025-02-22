@@ -4,10 +4,10 @@
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
 
-namespace QuantumCode\PagarmeSDK\Recurrence;
+namespace QuantumTecnology\PagarmeSDK\Recurrence;
 
 use App\Repositories\BaseRepository;
-use QuantumCode\ValidateTrait\Data;
+use QuantumTecnology\ValidateTrait\Data;
 use Illuminate\Support\Facades\Http;
 
 class SubscriptionRepository extends BaseRepository
