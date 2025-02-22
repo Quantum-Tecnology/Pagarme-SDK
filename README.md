@@ -11,7 +11,7 @@ Sempre que possivel ele sera atualizado, e esta aberto para a comunidade sugerir
 Para utilizar a classe, basta instalar ela utilizando o comando do composer:
 
 ```
-composer require gustavosantarosa/pagarme-sdk
+composer require quantumcode/pagarme-sdk
 ```
 
 Em seguida basta publicar o config dela em config/pagarme.php
@@ -37,10 +37,10 @@ Nele existem algumas ferramentas uteis.
 
 ## 🧐 Outras Bibliotecas
 
-- [Enum-Basics-Extension](https://packagist.org/packages/gustavosantarosa/enum-basics-extension) - Utilizado para auxiliar nas Classes de Enums;
-- [SetSchema-Trait](https://packagist.org/packages/gustavosantarosa/setschema-trait-postgresql) - Suprir a necessidade de setar os schemas automaticamente do PostgreSQL;
-- [Validate-Trait](https://packagist.org/packages/gustavosantarosa/validate-trait) - Bindar os Requests automaticamente de acordo com o caminho do Service Pattern;
-- [PerPage-Trait](https://packagist.org/packages/gustavosantarosa/perpage-trait) - Padronizar a quantidade do paginate na api inteira e definir uma quantidade máxima;
+- [Enum-Basics-Extension](https://packagist.org/packages/quantumcode/enum-basics-extension) - Utilizado para auxiliar nas Classes de Enums;
+- [SetSchema-Trait](https://packagist.org/packages/quantumcode/setschema-trait-postgresql) - Suprir a necessidade de setar os schemas automaticamente do PostgreSQL;
+- [Validate-Trait](https://packagist.org/packages/quantumcode/validate-trait) - Bindar os Requests automaticamente de acordo com o caminho do Service Pattern;
+- [PerPage-Trait](https://packagist.org/packages/quantumcode/perpage-trait) - Padronizar a quantidade do paginate na api inteira e definir uma quantidade máxima;
 
 ## ⛏️ Ferramentas
 
@@ -49,4 +49,4 @@ Nele existem algumas ferramentas uteis.
 
 ## ✍️ Autor
 
-- [@Luis Gustavo Santarosa Pinto](https://github.com/GustavoSantarosa) - Idea & Initial work
+- [@Luis Gustavo Santarosa Pinto](https://github.com/QuantumCode) - Idea & Initial work

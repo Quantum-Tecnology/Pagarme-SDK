@@ -1,6 +1,6 @@
 <?php
 
-namespace GustavoSantarosa\PagarmeSDK;
+namespace QuantumCode\PagarmeSDK;
 
 abstract class BaseRepository
 {

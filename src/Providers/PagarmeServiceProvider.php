@@ -1,6 +1,6 @@
 <?php
 
-namespace GustavoSantarosa\PagarmeSDK\Providers;
+namespace QuantumCode\PagarmeSDK\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

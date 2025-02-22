@@ -4,7 +4,7 @@
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
 
-namespace GustavoSantarosa\PagarmeSDK;
+namespace QuantumCode\PagarmeSDK;
 
 use Illuminate\Support\Facades\Http;
 
