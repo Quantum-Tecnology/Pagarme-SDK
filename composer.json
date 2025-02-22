@@ -1,5 +1,5 @@
 {
-  "name": "gustavosantarosa/pagarme-sdk",
+  "name": "quantumcode/pagarme-sdk",
   "license": "MIT",
   "homepage": "http://www.gustavosantarosa.esy.es/",
   "description": "Pagarme SDK",
@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "GustavoSantarosa\\PagarmeSDK\\": "src/"
+      "QuantumCode\\PagarmeSDK\\": "src/"
     }
   },
   "authors": [
@@ -26,7 +26,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "GustavoSantarosa\\PagarmeSDK\\Providers\\PagarmeServiceProvider"
+        "QuantumCode\\PagarmeSDK\\Providers\\PagarmeServiceProvider"
       ]
     }
   },
