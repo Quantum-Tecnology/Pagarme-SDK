@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
@@ -12,20 +14,20 @@ use Illuminate\Support\Facades\Http;
 
 class OrderRepository
 {
+    public bool $success   = false;
+    public string $message = 'success';
+    public array $errors   = [];
+    public array | object $data;
     private string $url;
-    public bool $success    = false;
-    public string $message  = 'success';
-    public array $errors    = [];
     private array $payments = [];
     private array $customer = [];
     private array $items    = [];
-    public array|object $data;
     private string $token;
 
     public function __construct()
     {
         $this->url   = config('services.pagarme.url');
-        $this->token = base64_encode(config('services.pagarme.access_token').':');
+        $this->token = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     public function create(array $data = [])
@@ -42,7 +44,7 @@ class OrderRepository
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            ->post($this->url.'/orders', $data);
+            ->post($this->url . '/orders', $data);
 
         $this->success = $response->successful();
 
@@ -58,7 +60,7 @@ class OrderRepository
         return $this;
     }
 
-    public function map(object|array $data)
+    public function map(object | array $data)
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {
@@ -69,7 +71,7 @@ class OrderRepository
         return $data;
     }
 
-    public function setPayment(string $paymentMethod, object|array $data)
+    public function setPayment(string $paymentMethod, object | array $data)
     {
         $data = is_array($data) ? (object) $data : $data;
 
@@ -119,7 +121,7 @@ class OrderRepository
         return $this;
     }
 
-    public function setCustomer(object|array $data)
+    public function setCustomer(object | array $data)
     {
         $data = is_array($data) ? (object) $data : $data;
 
@@ -134,7 +136,7 @@ class OrderRepository
         return $this;
     }
 
-    public function setItem(object|array $data)
+    public function setItem(object | array $data)
     {
         $data = is_array($data) ? (object) $data : $data;
 

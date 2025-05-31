@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Sdk similar https://packagist.org/packages/mundipagg/mundiapi.
  */

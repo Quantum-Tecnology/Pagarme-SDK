@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace QuantumTecnology\PagarmeSDK\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -14,7 +16,7 @@ class PagarmeServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/pagarme.php' => config_path('pagarme.php'),
+            __DIR__ . '/../config/pagarme.php' => config_path('pagarme.php'),
         ], 'config');
     }
 
@@ -26,7 +28,7 @@ class PagarmeServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/pagarme.php', 'services'
+            __DIR__ . '/../config/pagarme.php', 'services'
         );
     }
 }

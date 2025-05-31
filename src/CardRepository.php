@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
@@ -10,17 +12,17 @@ use Illuminate\Support\Facades\Http;
 
 class CardRepository
 {
-    private string $url;
     public bool $success = false;
     public string $message;
     public array $errors = [];
-    public array|object $data;
+    public array | object $data;
+    private string $url;
     private string $token;
 
     public function __construct()
     {
         $this->url   = config('services.pagarme.url');
-        $this->token = base64_encode(config('services.pagarme.access_token').':');
+        $this->token = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     public function create(string $customerId, array $data = [])
@@ -54,9 +56,10 @@ class CardRepository
             ->acceptJson()
             ->asJson()
             // ->dd()
-            ->post($this->url."/customers/{$customerId}/cards", $data);
+            ->post($this->url . "/customers/{$customerId}/cards", $data);
 
         $this->success = $response->successful();
+
         if (!$response->successful()) {
             $this->message = $response->object()->message;
             $this->errors  = (array) $response->object()->errors;
@@ -76,7 +79,7 @@ class CardRepository
             ->acceptJson()
             ->asJson()
             // ->dd()
-            ->delete($this->url."/customers/{$customerId}/cards/{$cardId}");
+            ->delete($this->url . "/customers/{$customerId}/cards/{$cardId}");
 
         if (!$response->successful()) {
             return false;
@@ -85,7 +88,7 @@ class CardRepository
         return collect($this->map($response->object()));
     }
 
-    public function map(object|array $data)
+    public function map(object | array $data)
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {

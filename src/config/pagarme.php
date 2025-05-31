@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 return [
     'pagarme' => [
         'url'          => env('PAGARME_URL', 'https://api.pagar.me/core/v5'),

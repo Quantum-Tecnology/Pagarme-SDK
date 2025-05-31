@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
 
 namespace QuantumTecnology\PagarmeSDK\Recurrence;
 
-use App\Repositories\BaseRepository;
-use QuantumTecnology\ValidateTrait\Data;
 use Illuminate\Support\Facades\Http;
+use QuantumTecnology\PagarmeSDK\BaseRepository;
+use QuantumTecnology\ValidateTrait\Data;
 
 class SubscriptionRepository extends BaseRepository
 {
@@ -21,7 +23,7 @@ class SubscriptionRepository extends BaseRepository
             config('services.pagarme.url')
         );
 
-        $this->authorization = base64_encode(config('services.pagarme.access_token').':');
+        $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     /**
@@ -218,11 +220,11 @@ class SubscriptionRepository extends BaseRepository
     {
         collect($items)->each(function ($item, $key) {
             if (!isset($item['description'])) {
-                $this->errors = ['description' => 'Description is required on item '.$key];
+                $this->errors = ['description' => 'Description is required on item ' . $key];
             }
 
             if (!isset($item['quantity'])) {
-                $this->errors = ['quantity' => 'Quantity is required on item '.$key];
+                $this->errors = ['quantity' => 'Quantity is required on item ' . $key];
             }
 
             if (!in_array($item['status'], [
@@ -230,7 +232,7 @@ class SubscriptionRepository extends BaseRepository
                 'inactive',
                 'deleted',
             ])) {
-                $this->errors = ['status' => 'Invalid status on item '.$key];
+                $this->errors = ['status' => 'Invalid status on item ' . $key];
             }
         });
     }
@@ -304,18 +306,18 @@ class SubscriptionRepository extends BaseRepository
     {
         collect($increments)->each(function ($increment, $key) {
             if (isset($increment['value']) && is_int($increment['value'])) {
-                $this->errors = ['value' => 'Value must be an integer on increment '.$key];
+                $this->errors = ['value' => 'Value must be an integer on increment ' . $key];
             }
 
             if (isset($increment['cycles']) && is_string($increment['cycles'])) {
-                $this->errors = ['cycles' => 'Cycles must be an string on increment '.$key];
+                $this->errors = ['cycles' => 'Cycles must be an string on increment ' . $key];
             }
 
             if (isset($increment['increment_type']) && !in_array($increment['increment_type'], [
                 'percentage',
                 'flat',
             ])) {
-                $this->errors = ['increment_type' => 'Invalid increment type on increment '.$key];
+                $this->errors = ['increment_type' => 'Invalid increment type on increment ' . $key];
             }
         });
     }
@@ -336,11 +338,11 @@ class SubscriptionRepository extends BaseRepository
             $this->errors = ['name' => 'Name is required on custumer'];
         }
 
-        if (null !== $custumer && isset($custumer['email']) && strlen($custumer['email']) > 64) {
+        if (null !== $custumer && isset($custumer['email']) && mb_strlen($custumer['email']) > 64) {
             $this->errors = ['email' => 'Email must be less than 64 characters'];
         }
 
-        if (null !== $custumer && isset($custumer['code']) && strlen($custumer['code']) > 52) {
+        if (null !== $custumer && isset($custumer['code']) && mb_strlen($custumer['code']) > 52) {
             $this->errors = ['code' => 'Code must be less than 52 characters'];
         }
 
@@ -357,11 +359,11 @@ class SubscriptionRepository extends BaseRepository
             $this->errors = ['document' => 'Document number is required on custumer when document type is set'];
         }
 
-        if (null !== $custumer && isset($custumer['document']) && 'passport' === $custumer['document'] && strlen($custumer['document']) > 50) {
+        if (null !== $custumer && isset($custumer['document']) && 'passport' === $custumer['document'] && mb_strlen($custumer['document']) > 50) {
             $this->errors = ['document' => 'Document must be less than 50 characters when document type is passport'];
         }
 
-        if (null !== $custumer && isset($custumer['document']) && 'passport' !== $custumer['document'] && strlen($custumer['document']) > 16) {
+        if (null !== $custumer && isset($custumer['document']) && 'passport' !== $custumer['document'] && mb_strlen($custumer['document']) > 16) {
             $this->errors = ['document' => 'Document must be less than 16 characters when document type is cpf or cnpj'];
         }
 

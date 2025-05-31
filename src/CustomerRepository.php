@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * https://docs.pagar.me/reference/criar-cliente-1.
  */
@@ -17,7 +19,7 @@ class CustomerRepository
     public function __construct()
     {
         $this->url   = config('services.pagar_me.url');
-        $this->token = base64_encode(config('services.pagar_me.access_token').':');
+        $this->token = base64_encode(config('services.pagar_me.access_token') . ':');
     }
 
     public function create(array $data = [])
@@ -62,7 +64,7 @@ class CustomerRepository
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            ->post($this->url.'/customers', $data);
+            ->post($this->url . '/customers', $data);
 
         if (!$response->successful()) {
             return new Collection();
@@ -71,7 +73,7 @@ class CustomerRepository
         return $this->map($response->object());
     }
 
-    public function map(object|array $data)
+    public function map(object | array $data)
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {
