@@ -5,7 +5,9 @@
   "description": "Pagarme SDK",
   "require": {
     "php": "^8.0",
-    "laravel/framework": "^10.0 | ^11.0| ^12.0"
+    "laravel/framework": "^10.0 | ^11.0| ^12.0",
+    "quantumtecnology/validate-trait": "dev-main",
+    "laravel/pint": "dev-main"
   },
   "autoload": {
     "psr-4": {
@@ -34,5 +36,25 @@
     "allow-plugins": {
       "php-http/discovery": true
     }
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "dev-master",
+    "rector/rector": "dev-main"
+  },
+  "scripts": {
+    "test": [
+      "@rector --dry-run",
+      "@pint --test",
+      "@pest"
+    ],
+    "pint": [
+      "vendor\\bin\\pint"
+    ],
+    "rector": [
+      "vendor\\bin\\rector process"
+    ],
+    "pest": [
+      "vendor\\bin\\pest tests"
+    ]
   }
 }
