@@ -32,9 +32,6 @@ class SubscriptionRepository extends BaseRepository
      */
     public function index(): self
     {
-        // TODO - Implementar paginação
-        $this->urlApi .= '?page=1&size=10';
-
         $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
@@ -140,7 +137,7 @@ class SubscriptionRepository extends BaseRepository
         ?array $increments = [],
         ?array $items = [],
         ?string $metadata = null,
-        ?string $card = null,
+        ?array $card = null,
         ?array $data = [],
     ): self {
         if (null === $description && count($items) < 1) {
@@ -151,7 +148,10 @@ class SubscriptionRepository extends BaseRepository
         $this->paymentMethodValidation($payment_method, $card);
         $this->pricingSchemeValidation($pricing_scheme, $quantity);
         $this->incrementValidation($increments);
-        $this->custumerValidation($custumer, $custumer_id);
+        $this->custumerValidation(
+            custumer: $custumer,
+            custumer_id: $custumer_id
+        );
 
         if (!in_array($interval, [
             'day',
@@ -237,7 +237,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function paymentMethodValidation(
         string $payment_method,
-        ?string $card = null,
+        ?array $card = null,
     ): void {
         if (!in_array($payment_method, [
             'credit_card',

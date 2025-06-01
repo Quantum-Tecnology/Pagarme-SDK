@@ -1,6 +1,6 @@
 # CHANGE LOG
 
-## V1.0.5 (31/05/2025)
+## V1.1.0 (01/06/2025)
 
 # PT-BR
 
@@ -8,6 +8,7 @@
 - Rodado o pint no projeto. @GustavoSantarosa
 - Rodado o rector no projeto. @GustavoSantarosa
 - Iniciado a implementação dos planos de assinatura. @GustavoSantarosa
+- Corrigido alguns problemas no subscriber. @GustavoSantarosa
 
 # EN
 
@@ -15,3 +16,4 @@
 - Ran pint on the project. @GustavoSantarosa
 - Ran rector on the project. @GustavoSantarosa
 - Started the implementation of subscription plans. @GustavoSantarosa
+- Fixed some issues in the subscriber. @GustavoSantarosa
