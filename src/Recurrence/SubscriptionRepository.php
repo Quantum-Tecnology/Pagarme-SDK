@@ -33,9 +33,7 @@ class SubscriptionRepository extends BaseRepository
     public function index(): self
     {
         // TODO - Implementar paginação
-        if (true) {
-            $this->urlApi .= '?page=1&size=10';
-        }
+        $this->urlApi .= '?page=1&size=10';
 
         $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
@@ -62,7 +60,7 @@ class SubscriptionRepository extends BaseRepository
      */
     public function show(?string $id = null): self
     {
-        if (!$this->id) {
+        if (null === $this->id || '' === $this->id || '0' === $this->id) {
             $this->id = $id;
         }
 
@@ -94,7 +92,7 @@ class SubscriptionRepository extends BaseRepository
         ?string $id = null,
         ?bool $cancel_pending = true,
     ): self {
-        if (!$this->id) {
+        if (null === $this->id || '' === $this->id || '0' === $this->id) {
             $this->id = $id;
         }
 
@@ -218,7 +216,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function itemsValidation(array $items): void
     {
-        collect($items)->each(function ($item, $key) {
+        collect($items)->each(function ($item, string $key): void {
             if (!isset($item['description'])) {
                 $this->errors = ['description' => 'Description is required on item ' . $key];
             }
@@ -239,7 +237,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function paymentMethodValidation(
         string $payment_method,
-        ?array $card = null,
+        ?string $card = null,
     ): void {
         if (!in_array($payment_method, [
             'credit_card',
@@ -266,7 +264,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function pricingSchemeValidation(
         array $pricing_scheme,
-        string $quantity,
+        int $quantity,
     ): void {
         if (!in_array($pricing_scheme['scheme_type'], [
             'unit',
@@ -304,7 +302,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function incrementValidation(array $increments): void
     {
-        collect($increments)->each(function ($increment, $key) {
+        collect($increments)->each(function ($increment, string $key): void {
             if (isset($increment['value']) && is_int($increment['value'])) {
                 $this->errors = ['value' => 'Value must be an integer on increment ' . $key];
             }

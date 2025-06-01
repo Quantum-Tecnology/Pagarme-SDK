@@ -73,7 +73,7 @@ class CustomerRepository
         return $this->map($response->object());
     }
 
-    public function map(object | array $data)
+    public function map(object | array $data): object | array
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {

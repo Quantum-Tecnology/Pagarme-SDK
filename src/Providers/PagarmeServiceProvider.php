@@ -10,10 +10,8 @@ class PagarmeServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__ . '/../config/pagarme.php' => config_path('pagarme.php'),
@@ -22,10 +20,8 @@ class PagarmeServiceProvider extends ServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(
             __DIR__ . '/../config/pagarme.php', 'services'

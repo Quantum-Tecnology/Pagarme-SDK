@@ -6,8 +6,10 @@
 
 - Instalado pint, rector e php-cs-fixer para padronização do código. @GustavoSantarosa
 - Rodado o pint no projeto. @GustavoSantarosa
+- Rodado o rector no projeto. @GustavoSantarosa
 
 # EN
 
 - Installed pint, rector, and php-cs-fixer for code standardization. @GustavoSantarosa
 - Ran pint on the project. @GustavoSantarosa
+- Ran rector on the project. @GustavoSantarosa

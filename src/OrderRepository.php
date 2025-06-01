@@ -30,7 +30,7 @@ class OrderRepository
         $this->token = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
-    public function create(array $data = [])
+    public function create(array $data = []): static
     {
         if (0 == count($data)) {
             $data = [
@@ -60,7 +60,7 @@ class OrderRepository
         return $this;
     }
 
-    public function map(object | array $data)
+    public function map(object | array $data): object | array
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {
@@ -71,7 +71,7 @@ class OrderRepository
         return $data;
     }
 
-    public function setPayment(string $paymentMethod, object | array $data)
+    public function setPayment(string $paymentMethod, object | array $data): static
     {
         $data = is_array($data) ? (object) $data : $data;
 
@@ -121,7 +121,7 @@ class OrderRepository
         return $this;
     }
 
-    public function setCustomer(object | array $data)
+    public function setCustomer(object | array $data): static
     {
         $data = is_array($data) ? (object) $data : $data;
 
@@ -136,7 +136,7 @@ class OrderRepository
         return $this;
     }
 
-    public function setItem(object | array $data)
+    public function setItem(object | array $data): static
     {
         $data = is_array($data) ? (object) $data : $data;
 

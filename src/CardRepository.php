@@ -25,7 +25,7 @@ class CardRepository
         $this->token = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
-    public function create(string $customerId, array $data = [])
+    public function create(string $customerId, array $data = []): static
     {
         if (0 == count($data)) {
             $data = [
@@ -88,7 +88,7 @@ class CardRepository
         return collect($this->map($response->object()));
     }
 
-    public function map(object | array $data)
+    public function map(object | array $data): object | array
     {
         foreach ($data as $index => $attribute) {
             if (is_array($attribute)) {

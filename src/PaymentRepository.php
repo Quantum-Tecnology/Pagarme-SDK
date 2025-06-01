@@ -12,24 +12,22 @@ use QuantumTecnology\PagarmeSDK\Recurrence\SubscriptionRepository;
 
 class PaymentRepository
 {
-    private string $module;
-
-    public static function card()
+    public static function card(): CardRepository
     {
         return new CardRepository();
     }
 
-    public static function customer()
+    public static function customer(): CustomerRepository
     {
         return new CustomerRepository();
     }
 
-    public static function order()
+    public static function order(): OrderRepository
     {
         return new OrderRepository();
     }
 
-    public static function recurrence(string $module)
+    public static function recurrence(string $module): SubscriptionRepository | false
     {
         return match ($module) {
             'subscription' => new SubscriptionRepository(),
