@@ -18,10 +18,7 @@ class SubscriptionRepository extends BaseRepository
 
     public function __construct()
     {
-        $this->urlApi = sprintf(
-            '%s/core/v5/subscriptions',
-            config('services.pagarme.url')
-        );
+        $this->urlApi = config('services.pagarme.url') . '/subscriptions';
 
         $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }

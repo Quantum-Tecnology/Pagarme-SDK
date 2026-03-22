@@ -94,10 +94,7 @@ class PlanRepository extends BaseRepository
 
     public function __construct()
     {
-        $this->urlApi = sprintf(
-            '%s/core/v5/plans',
-            config('services.pagarme.url')
-        );
+        $this->urlApi = config('services.pagarme.url') . '/plans';
 
         $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
