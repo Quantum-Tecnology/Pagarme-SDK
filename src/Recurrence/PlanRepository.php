@@ -143,15 +143,18 @@ class PlanRepository extends BaseRepository
             ->asJson()
             ->get($this->urlApi, $query);
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->data = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = collect($response->object()->data);
+        $this->success = true;
+        $this->data    = collect($response->json());
 
         return $this;
     }
@@ -172,22 +175,24 @@ class PlanRepository extends BaseRepository
             ->asJson()
             ->get("{$this->urlApi}/{$this->id}");
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->http_code = $response->status();
-            $this->data      = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
 
     /**
-     * Get plan.
+     * Update metadata.
      * Url: https://docs.pagar.me/reference/obter-plano-1.
      */
     public function updateMetadata(?string $id = null): self
@@ -202,16 +207,18 @@ class PlanRepository extends BaseRepository
             ->asJson()
             ->patch("{$this->urlApi}/{$this->id}/metadata");
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->http_code = $response->status();
-            $this->data      = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
@@ -302,15 +309,15 @@ class PlanRepository extends BaseRepository
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = (array) ($response->object()->data ?? []);
-            $this->data   = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
@@ -408,21 +415,21 @@ class PlanRepository extends BaseRepository
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = (array) ($response->object()->data ?? []);
-            $this->data   = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
 
     /**
-     * Get plan.
+     * Delete plan.
      * Url: https://docs.pagar.me/reference/obter-plano-1.
      */
     public function destroy(?string $id = null): self
@@ -437,16 +444,18 @@ class PlanRepository extends BaseRepository
             ->asJson()
             ->delete("{$this->urlApi}/{$this->id}");
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->http_code = $response->status();
-            $this->data      = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }

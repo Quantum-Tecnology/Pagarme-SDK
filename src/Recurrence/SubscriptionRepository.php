@@ -35,15 +35,18 @@ class SubscriptionRepository extends BaseRepository
             ->asJson()
             ->get($this->urlApi);
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->data = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = collect($response->object()->data);
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
@@ -64,16 +67,18 @@ class SubscriptionRepository extends BaseRepository
             ->asJson()
             ->get("{$this->urlApi}/{$this->id}");
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->http_code = $response->status();
-            $this->data      = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
@@ -100,16 +105,18 @@ class SubscriptionRepository extends BaseRepository
             ->asJson()
             ->delete("{$this->urlApi}/{$this->id}", $data->toArray());
 
+        $this->http_code = $response->status();
+
         if (!$response->successful()) {
-            $this->http_code = $response->status();
-            $this->data      = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
@@ -206,15 +213,15 @@ class SubscriptionRepository extends BaseRepository
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = (array) ($response->object()->data ?? []);
-            $this->data   = collect();
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = collect();
 
             return $this;
         }
 
-        $this->success = $response->successful() && $response->object()->success;
-        $this->message = $response->object()->message;
-        $this->data    = $response->object()->data;
+        $this->success = true;
+        $this->data    = $this->map($response->object());
 
         return $this;
     }
