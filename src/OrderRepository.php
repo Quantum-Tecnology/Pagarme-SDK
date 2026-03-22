@@ -8,26 +8,19 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK;
 
-use App\Enums\PaymentEnum;
-use App\Exceptions\PaymentOperatorException;
 use Illuminate\Support\Facades\Http;
+use QuantumTecnology\PagarmeSDK\Exceptions\PaymentException;
 
-class OrderRepository
+class OrderRepository extends BaseRepository
 {
-    public bool $success   = false;
-    public string $message = 'success';
-    public array $errors   = [];
-    public array | object $data;
-    private string $url;
     private array $payments = [];
     private array $customer = [];
     private array $items    = [];
-    private string $token;
 
     public function __construct()
     {
-        $this->url   = config('services.pagarme.url');
-        $this->token = base64_encode(config('services.pagarme.access_token') . ':');
+        $this->urlApi = config('services.pagarme.url');
+        $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     public function create(array $data = []): static
@@ -40,17 +33,18 @@ class OrderRepository
             ];
         }
 
-        $response = Http::withToken($this->token, 'Basic')
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            ->post($this->url . '/orders', $data);
+            ->post($this->urlApi . '/orders', $data);
 
-        $this->success = $response->successful();
+        $this->success   = $response->successful();
+        $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->message = $response->object()->message;
-            $this->errors  = (array) $response->object()->errors;
+            $this->message = $response->object()->message ?? 'Order creation failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
 
             return $this;
         }
@@ -60,23 +54,12 @@ class OrderRepository
         return $this;
     }
 
-    public function map(object | array $data): object | array
-    {
-        foreach ($data as $index => $attribute) {
-            if (is_array($attribute)) {
-                $data->$index = collect($attribute);
-            }
-        }
-
-        return $data;
-    }
-
     public function setPayment(string $paymentMethod, object | array $data): static
     {
         $data = is_array($data) ? (object) $data : $data;
 
-        if (PaymentEnum::METHOD_CREDITCARD === $paymentMethod) {
-            throw_if(!isset($data->card->cvv), new PaymentOperatorException('O campo cvv é obrigatório.'));
+        if ('credit_card' === $paymentMethod) {
+            throw_if(!isset($data->card->cvv), new PaymentException('O campo cvv é obrigatório.'));
 
             if (!isset($data->installments)) {
                 $data->installments = 1;
@@ -110,8 +93,8 @@ class OrderRepository
             }
 
             $this->payments[] = [
-                'payment_method'               => PaymentEnum::METHOD_CREDITCARD,
-                PaymentEnum::METHOD_CREDITCARD => [
+                'payment_method' => 'credit_card',
+                'credit_card'    => [
                     'installments'         => $data->installments,
                     'statement_descriptor' => $data->statement_descriptor,
                 ] + $card,

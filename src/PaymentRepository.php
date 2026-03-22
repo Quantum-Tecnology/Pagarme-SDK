@@ -8,6 +8,7 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK;
 
+use QuantumTecnology\PagarmeSDK\Recurrence\PlanRepository;
 use QuantumTecnology\PagarmeSDK\Recurrence\SubscriptionRepository;
 
 class PaymentRepository
@@ -27,11 +28,16 @@ class PaymentRepository
         return new OrderRepository();
     }
 
-    public static function recurrence(string $module): SubscriptionRepository | false
+    public static function plan(): PlanRepository
+    {
+        return new PlanRepository();
+    }
+
+    public static function recurrence(string $module): SubscriptionRepository | PlanRepository | false
     {
         return match ($module) {
             'subscription' => new SubscriptionRepository(),
-            // 'account'      => new AccountRepository(),
+            'plan'         => new PlanRepository(),
             default => false,
         };
     }

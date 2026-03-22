@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 /**
- * https://docs.pagar.me/reference/criar-cliente-1.
+ * https://docs.pagar.me/reference/criar-assinatura-avulsa.
  */
 
 namespace QuantumTecnology\PagarmeSDK\Recurrence;
@@ -82,7 +82,7 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * Cancel subscription
+     * Cancel subscription.
      * Url: https://docs.pagar.me/reference/cancelar-assinatura-1.
      */
     public function destroy(
@@ -118,12 +118,12 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * Create separate signature.
+     * Create subscription.
      * Url: https://docs.pagar.me/reference/criar-assinatura-avulsa.
      */
     public function store(
-        ?string $custumer_id = null,
-        ?array $custumer = null,
+        ?string $customer_id = null,
+        ?array $customer = null,
         ?string $payment_method = 'credit_card',
         ?string $interval = 'month',
         ?string $currency = 'BRL',
@@ -137,20 +137,20 @@ class SubscriptionRepository extends BaseRepository
         ?array $increments = [],
         ?array $items = [],
         ?string $metadata = null,
-        ?array $card = null,
+        null|string|array $card = null,
         ?array $data = [],
     ): self {
         if (null === $description && count($items) < 1) {
-            $this->errors = ['description' => 'Description is required when items is empty'];
+            $this->errors['description'] = 'Description is required when items is empty';
         }
 
         $this->itemsValidation($items);
         $this->paymentMethodValidation($payment_method, $card);
         $this->pricingSchemeValidation($pricing_scheme, $quantity);
         $this->incrementValidation($increments);
-        $this->custumerValidation(
-            custumer: $custumer,
-            custumer_id: $custumer_id
+        $this->customerValidation(
+            customer: $customer,
+            customer_id: $customer_id
         );
 
         if (!in_array($interval, [
@@ -159,7 +159,7 @@ class SubscriptionRepository extends BaseRepository
             'month',
             'year',
         ])) {
-            $this->errors = ['interval' => 'Invalid interval'];
+            $this->errors['interval'] = 'Invalid interval';
         }
 
         if (!in_array($billing_type, [
@@ -167,7 +167,7 @@ class SubscriptionRepository extends BaseRepository
             'postpaid',
             'exact_day',
         ])) {
-            $this->errors = ['billing_type' => 'Invalid billing type'];
+            $this->errors['billing_type'] = 'Invalid billing type';
         }
 
         if (count($this->errors) > 0) {
@@ -177,8 +177,8 @@ class SubscriptionRepository extends BaseRepository
         }
 
         $data                 = new Data($data);
-        $data->custumer_id    = $custumer_id;
-        $data->custumer       = $custumer;
+        $data->customer_id    = $customer_id;
+        $data->customer       = $customer;
         $data->payment_method = $payment_method;
         $data->interval       = $interval;
         $data->minimum_price  = $minimum_price;
@@ -190,9 +190,16 @@ class SubscriptionRepository extends BaseRepository
         $data->metadata       = $metadata;
         $data->currency       = $currency;
         $data->increments     = $increments;
-        $data->items          = [['pricing_scheme' => ['scheme_type' => 'Unit']]];
+        $data->items          = $items;
 
-        $response = Http::withToken($this->authorization, null)
+        // Handle card: string = card_id, array = full card details
+        if (is_string($card)) {
+            $data->card_id = $card;
+        } elseif (is_array($card)) {
+            $data->card = $card;
+        }
+
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
@@ -201,7 +208,7 @@ class SubscriptionRepository extends BaseRepository
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = $response->object()->data ?? [];
+            $this->errors = (array) ($response->object()->data ?? []);
             $this->data   = collect();
 
             return $this;
@@ -218,158 +225,166 @@ class SubscriptionRepository extends BaseRepository
     {
         collect($items)->each(function ($item, string $key): void {
             if (!isset($item['description'])) {
-                $this->errors = ['description' => 'Description is required on item ' . $key];
+                $this->errors["items.{$key}.description"] = 'Description is required on item ' . $key;
             }
 
             if (!isset($item['quantity'])) {
-                $this->errors = ['quantity' => 'Quantity is required on item ' . $key];
+                $this->errors["items.{$key}.quantity"] = 'Quantity is required on item ' . $key;
             }
 
-            if (!in_array($item['status'], [
+            if (isset($item['status']) && !in_array($item['status'], [
                 'active',
                 'inactive',
                 'deleted',
             ])) {
-                $this->errors = ['status' => 'Invalid status on item ' . $key];
+                $this->errors["items.{$key}.status"] = 'Invalid status on item ' . $key;
             }
         });
     }
 
     private function paymentMethodValidation(
         string $payment_method,
-        ?array $card = null,
+        null|string|array $card = null,
     ): void {
         if (!in_array($payment_method, [
             'credit_card',
             'debit_card',
             'boleto',
         ])) {
-            $this->errors = ['payment_method' => 'Invalid payment method'];
+            $this->errors['payment_method'] = 'Invalid payment method';
+
+            return;
         }
 
-        if (null !== $card && in_array($payment_method, [
+        // Card is required for credit_card and debit_card
+        if (null === $card && in_array($payment_method, [
             'credit_card',
             'debit_card',
         ])) {
-            $this->errors = ['card' => 'Card is required on payment method credit_card or debit_card'];
+            $this->errors['card'] = 'Card is required for credit_card or debit_card payment methods';
+
+            return;
         }
 
-        if (in_array($payment_method, [
-            'credit_card',
-            'debit_card',
-        ]) && null === $card['number'] && (null === $card['id'] || null === $card['token'])) {
-            $this->errors = ['card' => 'Card number or card_id or card_token is required on payment method credit_card or debit_card'];
+        // String card = card_id or card_token, no further validation needed
+        if (is_string($card)) {
+            return;
+        }
+
+        // Array card must have number, card_id, or card_token
+        if (is_array($card) && !isset($card['number']) && !isset($card['card_id']) && !isset($card['card_token'])) {
+            $this->errors['card'] = 'Card number, card_id, or card_token is required';
         }
     }
 
     private function pricingSchemeValidation(
         array $pricing_scheme,
-        int $quantity,
+        ?int $quantity,
     ): void {
-        if (!in_array($pricing_scheme['scheme_type'], [
+        if (!in_array($pricing_scheme['scheme_type'] ?? null, [
             'unit',
             'package',
             'tier',
             'volume',
         ])) {
-            $this->errors = ['pricing_scheme' => 'Invalid pricing scheme'];
+            $this->errors['pricing_scheme'] = 'Invalid pricing scheme';
         }
 
-        if ('unit' === $pricing_scheme['scheme_type'] && null == $pricing_scheme['price']) {
-            $this->errors = ['price' => 'Price is required on pricing scheme unit'];
+        if ('unit' === ($pricing_scheme['scheme_type'] ?? null) && empty($pricing_scheme['price'])) {
+            $this->errors['price'] = 'Price is required on pricing scheme unit';
         }
 
-        if (null !== $pricing_scheme['price_brackets'] && in_array($pricing_scheme['scheme_type'], [
+        if (!isset($pricing_scheme['price_brackets']) && in_array($pricing_scheme['scheme_type'] ?? null, [
             'package',
             'tier',
             'volume',
         ])) {
-            $this->errors = ['price_brackets' => 'Price brackets is required on pricing scheme package, tier and volume'];
+            $this->errors['price_brackets'] = 'Price brackets is required on pricing scheme package, tier and volume';
         }
 
-        if (null !== $pricing_scheme['price'] && in_array($pricing_scheme['scheme_type'], [
+        if (isset($pricing_scheme['price']) && in_array($pricing_scheme['scheme_type'] ?? null, [
             'package',
             'tier',
             'volume',
         ])) {
-            $this->errors = ['price' => 'Price is not required on pricing scheme package, tier and volume'];
+            $this->errors['price_conflict'] = 'Price is not allowed on pricing scheme package, tier and volume';
         }
 
-        if ('unit' === $pricing_scheme['scheme_type'] && null === $quantity) {
-            $this->errors = ['quantity' => 'Quantity is required on pricing scheme unit'];
+        if ('unit' === ($pricing_scheme['scheme_type'] ?? null) && null === $quantity) {
+            $this->errors['quantity'] = 'Quantity is required on pricing scheme unit';
         }
     }
 
     private function incrementValidation(array $increments): void
     {
         collect($increments)->each(function ($increment, string $key): void {
-            if (isset($increment['value']) && is_int($increment['value'])) {
-                $this->errors = ['value' => 'Value must be an integer on increment ' . $key];
+            if (isset($increment['value']) && !is_int($increment['value'])) {
+                $this->errors["increments.{$key}.value"] = 'Value must be an integer on increment ' . $key;
             }
 
-            if (isset($increment['cycles']) && is_string($increment['cycles'])) {
-                $this->errors = ['cycles' => 'Cycles must be an string on increment ' . $key];
+            if (isset($increment['cycles']) && !is_int($increment['cycles'])) {
+                $this->errors["increments.{$key}.cycles"] = 'Cycles must be an integer on increment ' . $key;
             }
 
             if (isset($increment['increment_type']) && !in_array($increment['increment_type'], [
                 'percentage',
                 'flat',
             ])) {
-                $this->errors = ['increment_type' => 'Invalid increment type on increment ' . $key];
+                $this->errors["increments.{$key}.increment_type"] = 'Invalid increment type on increment ' . $key;
             }
         });
     }
 
-    private function custumerValidation(
-        ?array $custumer,
-        ?string $custumer_id,
+    private function customerValidation(
+        ?array $customer,
+        ?string $customer_id,
     ): void {
-        if (null === $custumer && null === $custumer_id) {
-            $this->errors = ['custumer' => 'Custumer or custumer_id is required'];
+        if (null === $customer && null === $customer_id) {
+            $this->errors['customer'] = 'Customer or customer_id is required';
         }
 
-        if (null !== $custumer && null !== $custumer_id) {
-            $this->errors = ['custumer' => 'Custumer and custumer_id cannot be used together'];
+        if (null !== $customer && null !== $customer_id) {
+            $this->errors['customer'] = 'Customer and customer_id cannot be used together';
         }
 
-        if (null !== $custumer && !isset($custumer['name'])) {
-            $this->errors = ['name' => 'Name is required on custumer'];
+        if (null !== $customer && !isset($customer['name'])) {
+            $this->errors['customer.name'] = 'Name is required on customer';
         }
 
-        if (null !== $custumer && isset($custumer['email']) && mb_strlen($custumer['email']) > 64) {
-            $this->errors = ['email' => 'Email must be less than 64 characters'];
+        if (null !== $customer && isset($customer['email']) && mb_strlen($customer['email']) > 64) {
+            $this->errors['customer.email'] = 'Email must be less than 64 characters';
         }
 
-        if (null !== $custumer && isset($custumer['code']) && mb_strlen($custumer['code']) > 52) {
-            $this->errors = ['code' => 'Code must be less than 52 characters'];
+        if (null !== $customer && isset($customer['code']) && mb_strlen($customer['code']) > 52) {
+            $this->errors['customer.code'] = 'Code must be less than 52 characters';
         }
 
-        if (null !== $custumer && isset($custumer['document_type']) && in_array($custumer['document_type'], [
+        if (null !== $customer && isset($customer['document_type']) && !in_array($customer['document_type'], [
             'cpf',
             'cnpj',
             'passport',
         ])
         ) {
-            $this->errors = ['document_type' => 'Invalid document type on custumer'];
+            $this->errors['customer.document_type'] = 'Invalid document type on customer';
         }
 
-        if (null !== $custumer && isset($custumer['document_type']) && !isset($custumer['document'])) {
-            $this->errors = ['document' => 'Document number is required on custumer when document type is set'];
+        if (null !== $customer && isset($customer['document_type']) && !isset($customer['document'])) {
+            $this->errors['customer.document'] = 'Document number is required on customer when document type is set';
         }
 
-        if (null !== $custumer && isset($custumer['document']) && 'passport' === $custumer['document'] && mb_strlen($custumer['document']) > 50) {
-            $this->errors = ['document' => 'Document must be less than 50 characters when document type is passport'];
+        if (null !== $customer && isset($customer['document_type']) && 'passport' === ($customer['document_type'] ?? null) && isset($customer['document']) && mb_strlen($customer['document']) > 50) {
+            $this->errors['customer.document_length'] = 'Document must be less than 50 characters when document type is passport';
         }
 
-        if (null !== $custumer && isset($custumer['document']) && 'passport' !== $custumer['document'] && mb_strlen($custumer['document']) > 16) {
-            $this->errors = ['document' => 'Document must be less than 16 characters when document type is cpf or cnpj'];
+        if (null !== $customer && isset($customer['document_type']) && 'passport' !== ($customer['document_type'] ?? null) && isset($customer['document']) && mb_strlen($customer['document']) > 16) {
+            $this->errors['customer.document_length'] = 'Document must be less than 16 characters when document type is cpf or cnpj';
         }
 
-        if (null !== $custumer && isset($custumer['gender']) && !in_array($custumer['gender'], [
+        if (null !== $customer && isset($customer['gender']) && !in_array($customer['gender'], [
             'male',
             'female',
         ])) {
-            $this->errors = ['gender' => 'Invalid gender on custumer'];
+            $this->errors['customer.gender'] = 'Invalid gender on customer';
         }
     }
 }

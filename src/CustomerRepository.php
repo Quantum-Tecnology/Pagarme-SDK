@@ -8,21 +8,17 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Http;
 
-class CustomerRepository
+class CustomerRepository extends BaseRepository
 {
-    private string $url;
-    private string $token;
-
     public function __construct()
     {
-        $this->url   = config('services.pagar_me.url');
-        $this->token = base64_encode(config('services.pagar_me.access_token') . ':');
+        $this->urlApi = config('services.pagarme.url');
+        $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
-    public function create(array $data = [])
+    public function create(array $data = []): static
     {
         if (0 == count($data)) {
             $data = [
@@ -60,27 +56,25 @@ class CustomerRepository
             ];
         }
 
-        $response = Http::withToken($this->token, 'Basic')
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            ->post($this->url . '/customers', $data);
+            ->post($this->urlApi . '/customers', $data);
+
+        $this->success   = $response->successful();
+        $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            return new Collection();
+            $this->message = $response->object()->message ?? 'Customer creation failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = [];
+
+            return $this;
         }
 
-        return $this->map($response->object());
-    }
+        $this->data = $this->map($response->object());
 
-    public function map(object | array $data): object | array
-    {
-        foreach ($data as $index => $attribute) {
-            if (is_array($attribute)) {
-                $data->$index = collect($attribute);
-            }
-        }
-
-        return $data;
+        return $this;
     }
 }

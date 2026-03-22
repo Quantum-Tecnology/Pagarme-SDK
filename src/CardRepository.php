@@ -10,19 +10,12 @@ namespace QuantumTecnology\PagarmeSDK;
 
 use Illuminate\Support\Facades\Http;
 
-class CardRepository
+class CardRepository extends BaseRepository
 {
-    public bool $success = false;
-    public string $message;
-    public array $errors = [];
-    public array | object $data;
-    private string $url;
-    private string $token;
-
     public function __construct()
     {
-        $this->url   = config('services.pagarme.url');
-        $this->token = base64_encode(config('services.pagarme.access_token') . ':');
+        $this->urlApi = config('services.pagarme.url');
+        $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     public function create(string $customerId, array $data = []): static
@@ -36,7 +29,6 @@ class CardRepository
                 'exp_year'        => 30,
                 'cvv'             => '351',
                 'brand'           => 'Mastercard',
-                // 'label'           => 'Sua bandeira',
                 'billing_address' => [
                     'line_1'   => '375, Av. General Osorio, Centro',
                     'line_2'   => '7º Andar',
@@ -51,18 +43,18 @@ class CardRepository
             ];
         }
 
-        $response = Http::withToken($this->token, 'Basic')
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            // ->dd()
-            ->post($this->url . "/customers/{$customerId}/cards", $data);
+            ->post($this->urlApi . "/customers/{$customerId}/cards", $data);
 
-        $this->success = $response->successful();
+        $this->success   = $response->successful();
+        $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->message = $response->object()->message;
-            $this->errors  = (array) $response->object()->errors;
+            $this->message = $response->object()->message ?? 'Card creation failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
 
             return $this;
         }
@@ -72,30 +64,26 @@ class CardRepository
         return $this;
     }
 
-    public function destroy(string $customerId, string $cardId)
+    public function destroy(string $customerId, string $cardId): static
     {
-        $response = Http::withToken($this->token, 'Basic')
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            // ->dd()
-            ->delete($this->url . "/customers/{$customerId}/cards/{$cardId}");
+            ->delete($this->urlApi . "/customers/{$customerId}/cards/{$cardId}");
+
+        $this->success   = $response->successful();
+        $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            return false;
+            $this->message = $response->object()->message ?? 'Card deletion failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+
+            return $this;
         }
 
-        return collect($this->map($response->object()));
-    }
+        $this->data = $this->map($response->object());
 
-    public function map(object | array $data): object | array
-    {
-        foreach ($data as $index => $attribute) {
-            if (is_array($attribute)) {
-                $data->$index = collect($attribute);
-            }
-        }
-
-        return $data;
+        return $this;
     }
 }

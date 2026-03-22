@@ -248,7 +248,7 @@ class PlanRepository extends BaseRepository
             'month',
             'year',
         ])) {
-            $this->errors = ['interval' => 'Invalid interval'];
+            $this->errors['interval'] = 'Invalid interval';
         }
 
         if (!in_array($billingType, [
@@ -256,7 +256,7 @@ class PlanRepository extends BaseRepository
             'postpaid',
             'exact_day',
         ])) {
-            $this->errors = ['billing_type' => 'Invalid billing type'];
+            $this->errors['billing_type'] = 'Invalid billing type';
         }
 
         if (count($this->errors) > 0) {
@@ -296,7 +296,7 @@ class PlanRepository extends BaseRepository
         $data->interval_count       = (int) $data->interval_count;
         $data->billing_days         = collect($data->billing_days)->map(fn ($day): int => (int) $day)->all();
 
-        $response = Http::withToken($this->authorization, null)
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
@@ -305,7 +305,7 @@ class PlanRepository extends BaseRepository
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = $response->object()->data ?? [];
+            $this->errors = (array) ($response->object()->data ?? []);
             $this->data   = collect();
 
             return $this;
@@ -319,8 +319,8 @@ class PlanRepository extends BaseRepository
     }
 
     /**
-     * Create separate signature.
-     * Url: https://docs.pagar.me/reference/criar-plano-1.
+     * Update plan.
+     * Url: https://docs.pagar.me/reference/atualizar-plano-1.
      */
     public function update(
         string $name,
@@ -347,7 +347,7 @@ class PlanRepository extends BaseRepository
             'month',
             'year',
         ])) {
-            $this->errors = ['interval' => 'Invalid interval'];
+            $this->errors['interval'] = 'Invalid interval';
         }
 
         if (!in_array($billingType, [
@@ -355,10 +355,17 @@ class PlanRepository extends BaseRepository
             'postpaid',
             'exact_day',
         ])) {
-            $this->errors = ['billing_type' => 'Invalid billing type'];
+            $this->errors['billing_type'] = 'Invalid billing type';
         }
 
         if (count($this->errors) > 0) {
+            $this->data = collect();
+
+            return $this;
+        }
+
+        if (null === $this->id || '' === $this->id || '0' === $this->id) {
+            $this->errors['id'] = 'Plan ID is required for update';
             $this->data = collect();
 
             return $this;
@@ -395,16 +402,16 @@ class PlanRepository extends BaseRepository
         $data->interval_count       = (int) $data->interval_count;
         $data->billing_days         = collect($data->billing_days)->map(fn ($day): int => (int) $day)->all();
 
-        $response = Http::withToken($this->authorization, null)
+        $response = Http::withToken($this->authorization, 'Basic')
             ->retry(3, 2000, throw: false)
             ->acceptJson()
             ->asJson()
-            ->put($this->urlApi, $data->toArray());
+            ->put("{$this->urlApi}/{$this->id}", $data->toArray());
 
         $this->http_code = $response->status();
 
         if (!$response->successful()) {
-            $this->errors = $response->object()->data ?? [];
+            $this->errors = (array) ($response->object()->data ?? []);
             $this->data   = collect();
 
             return $this;
