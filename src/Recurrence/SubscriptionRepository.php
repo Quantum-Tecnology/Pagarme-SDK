@@ -176,6 +176,7 @@ class SubscriptionRepository extends BaseRepository
         $data                 = new Data($data);
         $data->customer_id    = $customer_id;
         $data->customer       = $customer;
+        $data->description    = $description;
         $data->payment_method = $payment_method;
         $data->interval       = $interval;
         $data->minimum_price  = $minimum_price;
