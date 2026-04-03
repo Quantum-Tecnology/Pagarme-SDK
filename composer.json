@@ -5,7 +5,7 @@
   "description": "Pagarme SDK",
   "require": {
     "php": "^8.2",
-    "laravel/framework": "^10.0 | ^11.0 | ^12.0",
+    "laravel/framework": "^10.0 | ^11.0 | ^12.0 | ^13.0",
     "quantumtecnology/validate-trait": "^2.0"
   },
   "autoload": {
