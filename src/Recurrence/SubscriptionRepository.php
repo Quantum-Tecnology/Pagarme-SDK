@@ -150,7 +150,11 @@ class SubscriptionRepository extends BaseRepository
 
         $this->itemsValidation($items);
         $this->paymentMethodValidation($payment_method, $card);
-        $this->pricingSchemeValidation($pricing_scheme, $quantity);
+
+        if ([] === $items) {
+            $this->pricingSchemeValidation($pricing_scheme, $quantity);
+        }
+
         $this->incrementValidation($increments);
         $this->customerValidation(
             customer: $customer,
@@ -189,13 +193,16 @@ class SubscriptionRepository extends BaseRepository
         $data->minimum_price  = $minimum_price;
         $data->interval_count = $interval_count;
         $data->billing_type   = $billing_type;
-        $data->installments   = $installments;
-        $data->pricing_scheme = $pricing_scheme;
-        $data->quantity       = $quantity;
         $data->metadata       = $metadata;
         $data->currency       = $currency;
         $data->increments     = $increments;
         $data->items          = $items;
+
+        if ([] === $items) {
+            $data->installments   = $installments;
+            $data->pricing_scheme = $pricing_scheme;
+            $data->quantity       = $quantity;
+        }
 
         // Handle card: string = card_id, array = full card details
         if (is_string($card)) {
