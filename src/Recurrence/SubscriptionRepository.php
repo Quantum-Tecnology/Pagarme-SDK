@@ -140,7 +140,7 @@ class SubscriptionRepository extends BaseRepository
         ?int $quantity = null,
         ?array $increments = [],
         ?array $items = [],
-        ?string $metadata = null,
+        null|string|array $metadata = null,
         null|string|array $card = null,
         ?array $data = [],
     ): self {
