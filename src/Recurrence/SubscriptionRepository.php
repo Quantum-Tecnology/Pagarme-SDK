@@ -262,19 +262,24 @@ class SubscriptionRepository extends BaseRepository
             'credit_card',
             'debit_card',
             'boleto',
+            'pix',
         ])) {
             $this->errors['payment_method'] = 'Invalid payment method';
 
             return;
         }
 
-        // Card is required for credit_card and debit_card
+        // Card is required for credit_card and debit_card (não para pix/boleto)
         if (null === $card && in_array($payment_method, [
             'credit_card',
             'debit_card',
         ])) {
             $this->errors['card'] = 'Card is required for credit_card or debit_card payment methods';
 
+            return;
+        }
+
+        if ('pix' === $payment_method || 'boleto' === $payment_method) {
             return;
         }
 

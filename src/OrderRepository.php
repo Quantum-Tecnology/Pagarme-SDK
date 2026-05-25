@@ -58,6 +58,18 @@ class OrderRepository extends BaseRepository
     {
         $data = is_array($data) ? (object) $data : $data;
 
+        if ('pix' === $paymentMethod) {
+            $this->payments[] = [
+                'payment_method' => 'pix',
+                'pix'            => [
+                    'expires_in'             => $data->expires_in ?? 3600,
+                    'additional_information' => $data->additional_information ?? [],
+                ],
+            ];
+
+            return $this;
+        }
+
         if ('credit_card' === $paymentMethod) {
             throw_if(!isset($data->card->cvv), new PaymentException('O campo cvv é obrigatório.'));
 
