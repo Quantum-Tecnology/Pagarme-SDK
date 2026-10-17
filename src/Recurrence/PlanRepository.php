@@ -8,7 +8,6 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK\Recurrence;
 
-use Illuminate\Support\Facades\Http;
 use QuantumTecnology\PagarmeSDK\BaseRepository;
 use QuantumTecnology\ValidateTrait\Data;
 
@@ -137,10 +136,7 @@ class PlanRepository extends BaseRepository
             $query['size'] = $size;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get($this->urlApi, $query);
 
         $this->http_code = $response->status();
@@ -169,10 +165,7 @@ class PlanRepository extends BaseRepository
             $this->id = $id;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get("{$this->urlApi}/{$this->id}");
 
         $this->http_code = $response->status();
@@ -201,10 +194,7 @@ class PlanRepository extends BaseRepository
             $this->id = $id;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('patch')
             ->patch("{$this->urlApi}/{$this->id}/metadata");
 
         $this->http_code = $response->status();
@@ -300,10 +290,7 @@ class PlanRepository extends BaseRepository
         $data->interval_count       = (int) $data->interval_count;
         $data->billing_days         = collect($data->billing_days)->map(fn ($day): int => (int) $day)->all();
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('post')
             ->post($this->urlApi, $data->toArray());
 
         $this->http_code = $response->status();
@@ -370,7 +357,7 @@ class PlanRepository extends BaseRepository
 
         if (null === $this->id || '' === $this->id || '0' === $this->id) {
             $this->errors['id'] = 'Plan ID is required for update';
-            $this->data = collect();
+            $this->data         = collect();
 
             return $this;
         }
@@ -406,10 +393,7 @@ class PlanRepository extends BaseRepository
         $data->interval_count       = (int) $data->interval_count;
         $data->billing_days         = collect($data->billing_days)->map(fn ($day): int => (int) $day)->all();
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('put')
             ->put("{$this->urlApi}/{$this->id}", $data->toArray());
 
         $this->http_code = $response->status();
@@ -438,10 +422,7 @@ class PlanRepository extends BaseRepository
             $this->id = $id;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('delete')
             ->delete("{$this->urlApi}/{$this->id}");
 
         $this->http_code = $response->status();
