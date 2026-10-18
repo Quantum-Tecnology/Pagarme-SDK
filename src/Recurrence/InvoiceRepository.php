@@ -8,7 +8,6 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK\Recurrence;
 
-use Illuminate\Support\Facades\Http;
 use QuantumTecnology\PagarmeSDK\BaseRepository;
 
 /**
@@ -49,10 +48,7 @@ class InvoiceRepository extends BaseRepository
      */
     public function index(array $filters = []): self
     {
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get($this->urlApi, array_filter($filters, static fn ($v): bool => null !== $v && '' !== $v));
 
         $this->http_code = $response->status();
@@ -81,10 +77,7 @@ class InvoiceRepository extends BaseRepository
             $this->id = $id;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get("{$this->urlApi}/{$this->id}");
 
         $this->http_code = $response->status();

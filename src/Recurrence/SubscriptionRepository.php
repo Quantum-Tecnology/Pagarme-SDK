@@ -8,7 +8,6 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK\Recurrence;
 
-use Illuminate\Support\Facades\Http;
 use QuantumTecnology\PagarmeSDK\BaseRepository;
 use QuantumTecnology\ValidateTrait\Data;
 
@@ -29,10 +28,7 @@ class SubscriptionRepository extends BaseRepository
      */
     public function index(): self
     {
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get($this->urlApi);
 
         $this->http_code = $response->status();
@@ -61,10 +57,7 @@ class SubscriptionRepository extends BaseRepository
             $this->id = $id;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('get')
             ->get("{$this->urlApi}/{$this->id}");
 
         $this->http_code = $response->status();
@@ -99,10 +92,7 @@ class SubscriptionRepository extends BaseRepository
             'cancel_pending_invoices' => $cancel_pending,
         ]);
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('delete')
             ->delete("{$this->urlApi}/{$this->id}", $data->toArray());
 
         $this->http_code = $response->status();
@@ -140,8 +130,8 @@ class SubscriptionRepository extends BaseRepository
         ?int $quantity = null,
         ?array $increments = [],
         ?array $items = [],
-        null|string|array $metadata = null,
-        null|string|array $card = null,
+        string | array | null $metadata = null,
+        string | array | null $card = null,
         ?array $data = [],
     ): self {
         if (null === $description && count($items) < 1) {
@@ -211,10 +201,7 @@ class SubscriptionRepository extends BaseRepository
             $data->card = $card;
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('post')
             ->post($this->urlApi, $data->toArray());
 
         $this->http_code = $response->status();
@@ -256,7 +243,7 @@ class SubscriptionRepository extends BaseRepository
 
     private function paymentMethodValidation(
         string $payment_method,
-        null|string|array $card = null,
+        string | array | null $card = null,
     ): void {
         if (!in_array($payment_method, [
             'credit_card',

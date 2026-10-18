@@ -8,7 +8,6 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK;
 
-use Illuminate\Support\Facades\Http;
 use QuantumTecnology\PagarmeSDK\Exceptions\PaymentException;
 
 class OrderRepository extends BaseRepository
@@ -19,7 +18,7 @@ class OrderRepository extends BaseRepository
 
     public function __construct()
     {
-        $this->urlApi = config('services.pagarme.url');
+        $this->urlApi        = config('services.pagarme.url');
         $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
@@ -33,10 +32,7 @@ class OrderRepository extends BaseRepository
             ];
         }
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('post')
             ->post($this->urlApi . '/orders', $data);
 
         $this->success   = $response->successful();
@@ -50,6 +46,65 @@ class OrderRepository extends BaseRepository
         }
 
         $this->data = $this->map($response->object());
+
+        return $this;
+    }
+
+    /**
+     * Consulta um pedido pelo id (`or_...`).
+     * Url: https://docs.pagar.me/reference/obter-pedido-1.
+     */
+    public function find(string $orderId): static
+    {
+        $response = $this->request('get')
+            ->get($this->urlApi . "/orders/{$orderId}");
+
+        $this->success   = $response->successful();
+        $this->http_code = $response->status();
+
+        if (!$response->successful()) {
+            $this->message = $response->object()->message ?? 'Order not found';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = [];
+
+            return $this;
+        }
+
+        $this->data = $this->map($response->object());
+
+        return $this;
+    }
+
+    /**
+     * Consulta o pedido pelo `code` que o próprio integrador definiu na
+     * criação. Serve para conciliar quando o id do pedido não chegou a ser
+     * gravado (ex.: timeout na resposta da criação). Se houver mais de um
+     * pedido com o mesmo código, devolve o mais recente.
+     * Url: https://docs.pagar.me/reference/listar-pedidos-1.
+     */
+    public function findByCode(string $code): static
+    {
+        $response = $this->request('get')
+            ->get($this->urlApi . '/orders', ['code' => $code, 'size' => 10]);
+
+        $this->http_code = $response->status();
+
+        if (!$response->successful()) {
+            $this->success = false;
+            $this->message = $response->object()->message ?? 'Request failed';
+            $this->errors  = (array) ($response->object()->errors ?? []);
+            $this->data    = [];
+
+            return $this;
+        }
+
+        $orders = collect($response->object()->data ?? [])
+            ->sortByDesc(static fn (object $order): string => (string) ($order->created_at ?? ''))
+            ->values();
+
+        $this->success = $orders->isNotEmpty();
+        $this->message = $this->success ? 'ok' : 'not found';
+        $this->data    = $this->success ? $this->map($orders->first()) : [];
 
         return $this;
     }

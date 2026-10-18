@@ -8,58 +8,23 @@ declare(strict_types = 1);
 
 namespace QuantumTecnology\PagarmeSDK;
 
-use Illuminate\Support\Facades\Http;
+use QuantumTecnology\PagarmeSDK\Exceptions\PaymentException;
 
 class CustomerRepository extends BaseRepository
 {
     public function __construct()
     {
-        $this->urlApi = config('services.pagarme.url');
+        $this->urlApi        = config('services.pagarme.url');
         $this->authorization = base64_encode(config('services.pagarme.access_token') . ':');
     }
 
     public function create(array $data = []): static
     {
-        if (0 == count($data)) {
-            $data = [
-                'name'          => 'Tony Stark',
-                'email'         => 'tonystarkk@avengers.com',
-                'code'          => 'MY_CUSTOMER_001',
-                'document'      => '93095135270',
-                'type'          => 'individual',
-                'document_type' => 'CPF',
-                'gender'        => 'male',
-                'address'       => [
-                    'line_1'   => '375, Av. General Justo, Centro',
-                    'line_2'   => '8º andar',
-                    'zip_code' => '20021130',
-                    'city'     => 'Rio de Janeiro',
-                    'state'    => 'RJ',
-                    'country'  => 'BR',
-                ],
-                'birthdate' => '05/03/1984',
-                'phones'    => [
-                    'home_phone' => [
-                        'country_code' => '55',
-                        'area_code'    => '21',
-                        'number'       => '000000000',
-                    ],
-                    'mobile_phone' => [
-                        'country_code' => '55',
-                        'area_code'    => '21',
-                        'number'       => '000000000',
-                    ],
-                ],
-                'metadata' => [
-                    'company' => 'Avengers',
-                ],
-            ];
-        }
+        // Sem dados não há o que criar. Antes era usado um cliente de teste
+        // fixo, que ia parar na conta de produção se alguém esquecesse o payload.
+        throw_if([] === $data, new PaymentException('Informe os dados para criar o cliente.'));
 
-        $response = Http::withToken($this->authorization, 'Basic')
-            ->retry(3, 2000, throw: false)
-            ->acceptJson()
-            ->asJson()
+        $response = $this->request('post')
             ->post($this->urlApi . '/customers', $data);
 
         $this->success   = $response->successful();

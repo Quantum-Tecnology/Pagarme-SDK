@@ -19,6 +19,11 @@ class PaymentRepository
         return new CardRepository();
     }
 
+    public static function charge(): ChargeRepository
+    {
+        return new ChargeRepository();
+    }
+
     public static function customer(): CustomerRepository
     {
         return new CustomerRepository();

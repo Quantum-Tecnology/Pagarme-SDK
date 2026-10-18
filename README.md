@@ -28,6 +28,31 @@ PAGARME_ACCESS_TOKEN=YourKey
 
 Pronto, ja é para estar funcionando.
 
+## 🔁 Repetição e idempotência
+
+O pacote só repete uma requisição quando isso não pode gerar efeito duplicado:
+
+- `GET`, `PUT`, `PATCH` e `DELETE` repetem até 3 vezes, só em falha de conexão ou erro 5xx.
+- `POST` **não repete**, a menos que tenha `Idempotency-Key`. Um timeout pode acontecer depois de o Pagar.me criar o pedido, e repetir sem chave criaria uma segunda cobrança.
+- Erro 4xx nunca é repetido.
+
+Para criar com segurança, envie uma chave estável por tentativa:
+
+```php
+$order = PaymentRepository::order()
+    ->withIdempotencyKey("{$invoiceId}-{$attempt}")
+    ->create($payload);
+```
+
+Em falha de conexão sem chave, a `ConnectionException` sobe para quem chamou. Use `findByCode()` para descobrir se o pedido foi criado antes de tentar de novo:
+
+```php
+$order = PaymentRepository::order()->findByCode($invoiceId);
+$charge = PaymentRepository::charge()->find('ch_...');
+```
+
+Para usar outra chave secreta que não a do `.env` (ex.: guardada no banco): `->withAccessToken($secretKey)`. O tempo limite vem de `PAGARME_TIMEOUT` (padrão: 30 s).
+
 ## 🎈 Recursos
 
 Nele existem algumas ferramentas uteis.
